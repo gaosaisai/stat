@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+<input type="text" id="min_year" placeholder="最小出生年份">
+<input type="text" id="max_year" placeholder="最大出生年份">
+<input type="text" id="min_travelkm" placeholder="最小里程">
+<input type="text" id="max_travelkm" placeholder="最大里程">
+<input type="text" id="min_traveltime" placeholder="最小旅行时间">
+<input type="text" id="max_traveltime" placeholder="最大旅行时间">
+<table class="layui-hide" id="test" lay-filter="test"></table>
+<h3>总旅行里程</h3>
+<div id="main" style="width: 800px;height:400px;"></div>
+<h3>总旅行时间</h3>
+<div id="main2" style="width: 800px;height:400px;"></div>
+
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="isAll">搜索</button>
+    </div>
+</script>
+<script src="layui/layui.js" charset="utf-8"></script>
+<script src="layui/echarts.min.js"></script>
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script>
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table,
+            $ = layui.$;
+        var tableIns = table.render({
+            elem: '#test'
+            , url: '/list'
+            , toolbar: '#toolbarDemo'
+            , title: '用户数据表'
+            , limits: [10, 20]
+            , totalRow: true
+            , cols: [
+                [
+                    {type: 'checkbox', fixed: 'left'}
+                    , {field: 'id', title: '人员ID', width: 150, fixed: 'left'}
+                    , {
+                    field: 'sex', title: '性别', width: 150,
+                    templet: function (d) {
+                        if (d.sex == 0) {
+                            return '<span>女</span>'
+                        } else {
+                            return '<span>男</span>'
+                        }
+                    }
+                }
+                    , {field: 'birth', title: '出生年份', width: 150}
+                    , {field: 'travelkm', title: '总旅行旅程', width: 150}
+                    , {field: 'traveltime', title: '总旅行时间', width: 150}
+                ]
+            ]
+            , page: true
+        });
+        bar()
+        //工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            switch (obj.event) {
+                case 'isAll':
+                    tableIns.reload({
+                        where: { //设定异步数据接口的额外参数，任意设
+                            min_year: $('#min_year').val(),
+                            max_year: $('#max_year').val(),
+                            min_travelkm: $('#min_travelkm').val(),
+                            max_travelkm: $('#max_travelkm').val(),
+                            min_traveltime: $('#min_traveltime').val(),
+                            max_traveltime: $('#max_traveltime').val()
+                        }
+                        , page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                    });
+                    bar()
+                    break;
+            }
+        });
+
+        function bar(){
+            $.ajax({
+                type: "GET",
+                url: "/pieVO",
+                data:{
+                    min_year: $('#min_year').val(),
+                    max_year: $('#max_year').val(),
+                },
+                success:function (res){
+                    let arr = res.data
+                    let kmArr = [0,0,0,0,0,0,0,0,0]
+                    let timeArr = [0,0,0,0,0,0,0,0,0]
+                    arr.forEach(function (item){
+                        if(item.birth >1920 && item.birth <1929){
+                            kmArr[0] += item.travelkm
+                            timeArr[0] += item.traveltime
+                        }else if(item.birth >1930 && item.birth <1939){
+                            kmArr[1] += item.travelkm
+                            timeArr[1] += item.traveltime
+                        }else if(item.birth >1940 && item.birth <1949){
+                            kmArr[2] += item.travelkm
+                            timeArr[2] += item.traveltime
+                        }else if(item.birth >1950 && item.birth <1959){
+                            kmArr[3] += item.travelkm
+                            timeArr[3] += item.traveltime
+                        }else if(item.birth >1960 && item.birth <1969){
+                            kmArr[4] += item.travelkm
+                            timeArr[4] += item.traveltime
+                        }else if(item.birth >1970 && item.birth <1979){
+                            kmArr[5] += item.travelkm
+                            timeArr[5] += item.traveltime
+                        }else if(item.birth >1980 && item.birth <1989){
+                            kmArr[6] += item.travelkm
+                            timeArr[6] += item.traveltime
+                        }else if(item.birth >1990 && item.birth <1999){
+                            kmArr[7] += item.travelkm
+                            timeArr[7] += item.traveltime
+                        }else if(item.birth >2000 && item.birth <2009){
+                            kmArr[8] += item.travelkm
+                            timeArr[8] += item.traveltime
+                        }
+                    })
+                    console.log('kmArr',kmArr);
+                    let myChart = echarts.init(document.querySelector('#main'));
+                    let myChart2 = echarts.init(document.querySelector('#main2'));
+
+                    // 指定图表的配置项和数据
+                    let option = {
+                        xAxis: {
+                            type: 'category',
+                            data: ['20年代','30年代','40年代','50年代','60年代','70年代','80年代','90年代','2000后']
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [{
+                            data: kmArr,
+                            type: 'bar'
+                        }]
+                    };
+                    let option2 = {
+                        xAxis: {
+                            type: 'category',
+                            data: ['20年代','30年代','40年代','50年代','60年代','70年代','80年代','90年代','2000后']
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [{
+                            data: timeArr,
+                            type: 'bar',
+                            itemStyle: {    // 图形的形状
+                                color: '#61a0a8',
+                            },
+                        }]
+                    };
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart.setOption(option);
+                    myChart2.setOption(option2);
+                }
+            })
+        }
+
+    });
+</script>
+
+</body>
+</html>
