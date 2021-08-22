@@ -18,21 +18,24 @@ import java.util.List;
 
 @Service
 public class PersonServiceImpl implements PersonService {
-
     @Autowired
     private PersonMapper personMapper;
-
     @Override
-    public DataVO<PersonVO> findData(Integer page, Integer limit, Integer min_year, Integer max_year, Integer min_travelkm, Integer max_travelkm, Integer min_traveltime, Integer max_traveltime) {
+    public DataVO<PersonVO> findData(
+            Integer page,
+            Integer limit,
+            Integer min_year,
+            Integer max_year,
+            Integer min_travelkm,
+            Integer max_travelkm,
+            Integer min_traveltime,
+            Integer max_traveltime
+    ) {
         DataVO dataVO = new DataVO();
         dataVO.setCode(0);
         dataVO.setMsg("");
-
         IPage<Person> personIPage = new Page<>(page,limit);
-
         QueryWrapper<Person> qw = new QueryWrapper<>();
-
-
         if (min_year != null){
             qw.ge("birth",min_year);//这里加的是表中的字段名称,ge 大于等于
         }

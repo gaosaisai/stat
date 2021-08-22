@@ -4,27 +4,51 @@
     <title></title>
     <link rel="stylesheet" href="layui/css/layui.css" media="all">
     <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <style>
+        .warp{
+            margin: 10px;
+            width: 180px;
+        }
+        input{
+            margin: 4px;
+        }
+    </style>
 </head>
 <body>
-<input type="text" id="min_year" placeholder="最小出生年份">
-<input type="text" id="max_year" placeholder="最大出生年份">
-<input type="text" id="min_travelkm" placeholder="最小里程">
-<input type="text" id="max_travelkm" placeholder="最大里程">
-<input type="text" id="min_traveltime" placeholder="最小旅行时间">
-<input type="text" id="max_traveltime" placeholder="最大旅行时间">
-<table class="layui-hide" id="test" lay-filter="test"></table>
-<h3>总旅行里程</h3>
-<div id="main" style="width: 800px;height:400px;"></div>
-<h3>总旅行时间</h3>
-<div id="main2" style="width: 800px;height:400px;"></div>
-
-<script type="text/html" id="toolbarDemo">
-    <div class="layui-btn-container">
-        <button class="layui-btn layui-btn-sm" lay-event="isAll">搜索</button>
+<div style="width: 1000px;margin: auto">
+    <div style="display: flex;justify-content: center">
+        <div style="display: flex">
+            <div class="warp">
+                <input type="text" id="min_year" placeholder="最小出生年份">
+                <input type="text" id="max_year" placeholder="最大出生年份">
+            </div>
+            <div class="warp">
+                <input type="text" id="min_travelkm" placeholder="最小里程">
+                <input type="text" id="max_travelkm" placeholder="最大里程">
+            </div>
+            <div class="warp">
+                <input type="text" id="min_traveltime" placeholder="最小旅行时间">
+                <input type="text" id="max_traveltime" placeholder="最大旅行时间">
+            </div>
+        </div>
+        <div style="display: flex;align-items: center">
+            <button class="layui-btn" id="search">搜索</button>
+        </div>
     </div>
-</script>
+
+    <table class="layui-hide" id="test"></table>
+    <button class="layui-btn" id="graph" style="margin: auto;display: block;margin-top: 10px">切换图表显示效果</button>
+    <h3>总旅行里程</h3>
+    <div id="main" style="width: 800px;height:400px;"></div>
+    <div id="main3" style="width: 800px;height:400px;display: none" ></div>
+    <h3>总旅行时间</h3>
+    <div id="main2" style="width: 800px;height:400px;"></div>
+    <div id="main4" style="width: 800px;height:400px;display: none"></div>
+
+</div>
+
 <script src="layui/layui.js" charset="utf-8"></script>
-<script src="layui/echarts.min.js"></script>
+<script src="layui/echarts.min.js" charset="utf-8"></script>
 
 <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
 
@@ -35,16 +59,15 @@
         var tableIns = table.render({
             elem: '#test'
             , url: '/list'
-            , toolbar: '#toolbarDemo'
             , title: '用户数据表'
             , limits: [10, 20]
             , totalRow: true
             , cols: [
                 [
-                    {type: 'checkbox', fixed: 'left'}
-                    , {field: 'id', title: '人员ID', width: 150, fixed: 'left'}
+                    {type: 'numbers', fixed: 'left'}
+                    , {field: 'id', title: '人员ID', fixed: 'left'}
                     , {
-                    field: 'sex', title: '性别', width: 150,
+                    field: 'sex', title: '性别',
                     templet: function (d) {
                         if (d.sex == 0) {
                             return '<span>女</span>'
@@ -53,36 +76,38 @@
                         }
                     }
                 }
-                    , {field: 'birth', title: '出生年份', width: 150}
-                    , {field: 'travelkm', title: '总旅行旅程', width: 150}
-                    , {field: 'traveltime', title: '总旅行时间', width: 150}
+                    , {field: 'birth', title: '出生年份'}
+                    , {field: 'travelkm', title: '总旅行旅程'}
+                    , {field: 'traveltime', title: '总旅行时间'}
                 ]
             ]
             , page: true
         });
         bar()
-        //工具栏事件
-        table.on('toolbar(test)', function (obj) {
-            switch (obj.event) {
-                case 'isAll':
-                    tableIns.reload({
-                        where: { //设定异步数据接口的额外参数，任意设
-                            min_year: $('#min_year').val(),
-                            max_year: $('#max_year').val(),
-                            min_travelkm: $('#min_travelkm').val(),
-                            max_travelkm: $('#max_travelkm').val(),
-                            min_traveltime: $('#min_traveltime').val(),
-                            max_traveltime: $('#max_traveltime').val()
-                        }
-                        , page: {
-                            curr: 1 //重新从第 1 页开始
-                        }
-                    });
-                    bar()
-                    break;
-            }
-        });
+        //搜索事件
+        $('#search').click(function (){
+            tableIns.reload({
+                where: { //设定异步数据接口的额外参数，任意设
+                    min_year: $('#min_year').val(),
+                    max_year: $('#max_year').val(),
+                    min_travelkm: $('#min_travelkm').val(),
+                    max_travelkm: $('#max_travelkm').val(),
+                    min_traveltime: $('#min_traveltime').val(),
+                    max_traveltime: $('#max_traveltime').val()
+                }
+                , page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            });
+            bar()
+        })
+        $('#graph').click(function (){
+            $('#main').toggle()
+            $('#main2').toggle()
+            $('#main3').toggle()
+            $('#main4').toggle()
 
+        })
         function bar(){
             $.ajax({
                 type: "GET",
@@ -95,42 +120,74 @@
                     let arr = res.data
                     let kmArr = [0,0,0,0,0,0,0,0,0]
                     let timeArr = [0,0,0,0,0,0,0,0,0]
+                    let pieTimeArr = [0,0,0,0,0,0,0,0,0]
+                    let pieKmArr = [0,0,0,0,0,0,0,0,0]
+
                     arr.forEach(function (item){
                         if(item.birth >1920 && item.birth <1929){
                             kmArr[0] += item.travelkm
                             timeArr[0] += item.traveltime
+                            pieTimeArr[0] = {value: timeArr[0], name: '20年代'}
+                            pieKmArr[0] = {value: kmArr[0], name: '20年代'}
                         }else if(item.birth >1930 && item.birth <1939){
                             kmArr[1] += item.travelkm
                             timeArr[1] += item.traveltime
+                            pieTimeArr[1] = {value: timeArr[1], name: '30年代'}
+                            pieKmArr[1] = {value: kmArr[1], name: '30年代'}
                         }else if(item.birth >1940 && item.birth <1949){
                             kmArr[2] += item.travelkm
                             timeArr[2] += item.traveltime
+                            pieTimeArr[2] = {value: timeArr[2], name: '40年代'}
+                            pieKmArr[2] ={value: kmArr[2], name: '40年代'}
                         }else if(item.birth >1950 && item.birth <1959){
                             kmArr[3] += item.travelkm
                             timeArr[3] += item.traveltime
+                            pieTimeArr[3] = {value: timeArr[3], name: '50年代'}
+                            pieKmArr[3] = {value: kmArr[3], name: '50年代'}
                         }else if(item.birth >1960 && item.birth <1969){
                             kmArr[4] += item.travelkm
                             timeArr[4] += item.traveltime
+                            pieTimeArr[4] ={value: timeArr[4], name: '60年代'}
+                            pieKmArr[4] ={value: kmArr[4], name: '60年代'}
                         }else if(item.birth >1970 && item.birth <1979){
                             kmArr[5] += item.travelkm
                             timeArr[5] += item.traveltime
+                            pieTimeArr[5] ={value: timeArr[5], name: '70年代'}
+                            pieKmArr[5] ={value: kmArr[5], name: '70年代'}
                         }else if(item.birth >1980 && item.birth <1989){
                             kmArr[6] += item.travelkm
                             timeArr[6] += item.traveltime
+                            pieTimeArr[6] ={value: timeArr[6] , name: '80年代'}
+                            pieKmArr[6] ={value: kmArr[6], name: '80年代'}
                         }else if(item.birth >1990 && item.birth <1999){
                             kmArr[7] += item.travelkm
                             timeArr[7] += item.traveltime
+                            pieTimeArr[7] ={value: timeArr[7], name: '90年代'}
+                            pieKmArr[7] ={value: kmArr[7] , name: '90年代'}
                         }else if(item.birth >2000 && item.birth <2009){
                             kmArr[8] += item.travelkm
                             timeArr[8] += item.traveltime
+                            pieTimeArr[8] ={value: timeArr[8], name: '2000后'}
+                            pieKmArr[8] ={value: kmArr[8], name: '2000后'}
                         }
                     })
+                    pieTimeArr = pieTimeArr.filter((ele) => {
+                        return ele != 0
+                    })
+                    pieKmArr = pieKmArr.filter((ele) => {
+                        return ele != 0
+                    })
+                    console.log('pieKmArr',pieKmArr);
                     console.log('kmArr',kmArr);
                     let myChart = echarts.init(document.querySelector('#main'));
                     let myChart2 = echarts.init(document.querySelector('#main2'));
-
+                    let myChart3 = echarts.init(document.querySelector('#main3'));
+                    let myChart4 = echarts.init(document.querySelector('#main4'));
                     // 指定图表的配置项和数据
                     let option = {
+                        tooltip: {
+                            show: true
+                        },
                         xAxis: {
                             type: 'category',
                             data: ['20年代','30年代','40年代','50年代','60年代','70年代','80年代','90年代','2000后']
@@ -140,13 +197,18 @@
                         },
                         series: [{
                             data: kmArr,
-                            type: 'bar'
+                            type: 'bar',
+                            tooltip: {}
+
                         }]
                     };
                     let option2 = {
                         xAxis: {
                             type: 'category',
                             data: ['20年代','30年代','40年代','50年代','60年代','70年代','80年代','90年代','2000后']
+                        },
+                        tooltip: {
+                            show: true
                         },
                         yAxis: {
                             type: 'value'
@@ -157,11 +219,73 @@
                             itemStyle: {    // 图形的形状
                                 color: '#61a0a8',
                             },
+                            tooltip: {}
                         }]
+                    };
+                    let option3 = {
+                        title: {
+
+                            left: 'center'
+                        },
+                        tooltip: {
+                            show: true
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            left: 'left',
+                        },
+                        series: [
+                            {
+                                name: '旅行里程',
+                                type: 'pie',
+                                radius: '50%',
+                                data:pieKmArr,
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                },
+                                tooltip: {}
+                            }
+                        ]
+                    };
+                    let option4 = {
+                        title: {
+                            left: 'center'
+                        },
+                        tooltip: {
+                            show: true,
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            left: 'left',
+                        },
+                        color:['#45C2E0', '#C1EBDD', '#FFC851','#5A5476','#1869A0','#FF9393'],
+                        series: [
+                            {
+                                name: '旅行时间',
+                                type: 'pie',
+                                radius: '50%',
+                                data: pieTimeArr,
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                },
+                                tooltip: {}
+
+                            }
+                        ]
                     };
                     // 使用刚指定的配置项和数据显示图表。
                     myChart.setOption(option);
                     myChart2.setOption(option2);
+                    myChart3.setOption(option3);
+                    myChart4.setOption(option4);
                 }
             })
         }

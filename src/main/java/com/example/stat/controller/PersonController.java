@@ -29,7 +29,16 @@ public class PersonController {
             Integer min_traveltime,
             Integer max_traveltime
     ){
-        return personService.findData(page,limit,min_year,max_year,min_travelkm,max_travelkm,min_traveltime,max_traveltime);
+        return personService.findData(
+                page,
+                limit,
+                min_year,
+                max_year,
+                min_travelkm,
+                max_travelkm,
+                min_traveltime,
+                max_traveltime
+        );
     }
 
     @GetMapping("/{url}")
